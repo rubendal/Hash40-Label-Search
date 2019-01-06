@@ -6,6 +6,7 @@ prefix = ''
 suffix = ''
 length = 0
 checkAll = False
+ignoreNum = False
 hashes = []
 defaultPath = "hashes.txt"
 
@@ -54,10 +55,10 @@ def StartLoop():
         process(char)
 
 def start(argv):
-    global defaultPath, prefix, suffix, length, checkAll
+    global defaultPath, prefix, suffix, length, checkAll, chars, ignoreNum
     path = defaultPath
     try:
-      opts, args = getopt.getopt(argv,"hl:p:s:f",["suffix=","prefix=","length=", "checkAll", "file="])
+      opts, args = getopt.getopt(argv,"hl:p:s:f",["suffix=","prefix=","length=", "checkAll", "file=", "ignoreNum"])
     except getopt.GetoptError:
         print('Usage: bruteforce.py -l <int> (-p <string>) (-s <string>) (--checkAll)')
         print('bruteforce.py -h for help')
@@ -78,6 +79,8 @@ def start(argv):
             length = int(arg)
         elif opt in ("--checkAll"):
             checkAll = True
+        elif opt in ("--ignoreNum"):
+            ignoreNum = True
         elif opt in ("--file", "-f"):
             path = arg
     
@@ -86,6 +89,8 @@ def start(argv):
         print('Usage: bruteforce.py -l <int> (-p <string>) (-s <string>) (--checkAll)')
         sys.exit()
 
+    if(ignoreNum):
+        chars = "abcdefghijklmnopqrstuvwxyz_"
     openFile(path)
     if(getInputLength() < length):
         StartLoop()
