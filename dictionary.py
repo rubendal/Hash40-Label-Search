@@ -1,5 +1,6 @@
 import sys, getopt
 import zlib
+from hash40 import Hash40
 
 dictionary = []
 prefix = ''
@@ -25,7 +26,8 @@ def openFile(path):
     global hashes
     f = open(path, "r")
     for x in f:
-        hashes.append(x.lower().strip())
+        if(x != "\n"):
+            hashes.append(Hash40(x.lower().strip()))
 
 def doCRC(string):
     return hex(zlib.crc32(bytearray(string, 'utf-8')))
@@ -33,8 +35,10 @@ def doCRC(string):
 def check(string):
     global prefix, suffix
     hash = doCRC(prefix + string + suffix)
-    if hash in hashes:
-        print("{0} -> {1} length: {2}".format(hash, prefix + string + suffix, len(prefix + string + suffix)))
+    length = len(prefix + string + suffix)
+    find = next((x for x in hashes if hash == x.hash and length == x.length), None)
+    if find:
+        print("{0} -> {1}".format(find.hash40, prefix + string + suffix))
 
 def checkLoop(currentDepth, prevWords, prevWord, string):
     global depth
