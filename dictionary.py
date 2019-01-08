@@ -5,7 +5,6 @@ from hash40 import Hash40
 dictionary = []
 prefix = ''
 suffix = ''
-length = 0
 depth = 0
 hashes = []
 defaultPath = "hashes.txt"
@@ -48,10 +47,8 @@ def checkLoop(currentDepth, prevWords, prevWord, string):
             loop(currentDepth, prevWords, prevWord, string)
 
 def process(currentDepth, prevWords, prevWord, string):
-    global length
-    if(len(string) + getInputLength() < length):
-            check(string)
-            checkLoop(currentDepth + 1, prevWords, prevWord, string)
+    check(string)
+    checkLoop(currentDepth + 1, prevWords, prevWord, string)
 
 def loop(currentDepth, prevWords, prevWord, string):
     global dictionary
@@ -85,18 +82,17 @@ def StartLoopFromWord(first):
                 process(0, [word], word, word)
 
 def start(argv):
-    global defaultPath, prefix, suffix, length, depth
+    global defaultPath, prefix, suffix, depth
     path = defaultPath
     first = None
     try:
-      opts, args = getopt.getopt(argv,"hl:d:p:s:f",["suffix=","prefix=","length=", "file=", "depth=", "startFrom="])
+      opts, args = getopt.getopt(argv,"h:d:p:s:f",["suffix=","prefix=", "file=", "depth=", "startFrom="])
     except getopt.GetoptError:
-        print('dictionary.py -l <int> (-d <int>) (-p <string>) (-s <string>) (--startFrom=<string>)')
+        print('dictionary.py (-d <int>) (-p <string>) (-s <string>) (--startFrom=<string>)')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
             print('dictionary.py -l <int> (-p <string>) (-s <string>) (--startFrom=<string>)')
-            print("-l/--length= <int>: Max length of strings, takes into account prefix and suffix")
             print("-d/--depth= <int>: Max amount of words to use (prefix/suffix not counted)")
             print("-p/--prefix= <string>: Prefix to add to generated strings")
             print("-s/--suffix= <string>: Suffix to add to generated strings")
@@ -106,8 +102,6 @@ def start(argv):
             prefix = arg
         elif opt in ("--sufix", "-s"):
             suffix = arg
-        elif opt in ("--length", "-l"):
-            length = int(arg)
         elif opt in ("--depth", "-d"):
             depth = int(arg)
         elif opt in ("--file", "-f"):
@@ -115,20 +109,12 @@ def start(argv):
         elif opt in ("--startFrom"):
             first = arg
     
-    if(length == 0):
-        print("Error: No length given")
-        print('Usage: dictionary.py -l <int> (-p <string>) (-s <string>) (--startFrom=<string>)')
-        sys.exit()
-    
-    if(getInputLength() < length):
-        openFile(path)
-        openDict()
-        if first is None:
-            StartLoop()
-        else:
-            StartLoopFromWord(first)
+    openFile(path)
+    openDict()
+    if first is None:
+        StartLoop()
     else:
-        print("length is lower than prefix + suffix")
+        StartLoopFromWord(first)
 
 if __name__ == "__main__":
     start(sys.argv[1:])
