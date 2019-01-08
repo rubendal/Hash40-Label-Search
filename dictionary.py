@@ -5,7 +5,7 @@ from hash40 import Hash40
 dictionary = []
 prefix = ''
 suffix = ''
-depth = 0
+depth = 2
 hashes = []
 defaultPath = "hashes.txt"
 dictionaryPath = "dictionary.txt"
@@ -109,12 +109,15 @@ def start(argv):
         elif opt in ("--startFrom"):
             first = arg
     
-    openFile(path)
-    openDict()
-    if first is None:
-        StartLoop()
+    if depth > 0:
+        openFile(path)
+        openDict()
+        if first is None:
+            StartLoop()
+        else:
+            StartLoopFromWord(first)
     else:
-        StartLoopFromWord(first)
+        print("error: depth cannot be lower than 1")
 
 if __name__ == "__main__":
     start(sys.argv[1:])
