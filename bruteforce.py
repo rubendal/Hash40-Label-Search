@@ -17,10 +17,14 @@ def getInputLength():
 
 def openFile(path):
     global hashes
+    tag = None
     f = open(path, "r")
     for x in f:
         if(x != "\n"):
-            hashes.append(Hash40(x.lower().strip()))
+            if x[0] == '-':
+                tag = x[1:].strip()
+            else:
+                hashes.append(Hash40(x.lower().strip(), tag))
 
 def doCRC(string):
     return hex(zlib.crc32(bytearray(string, 'utf-8')))
@@ -31,7 +35,10 @@ def check(string):
     length = len(prefix + string + suffix)
     find = next((x for x in hashes if hash == x.hash and length == x.length), None)
     if find:
-        print("{0} -> {1}".format(find.hash40, prefix + string + suffix))
+        if find.tag is None:
+            print("{0} -> {1}".format(find.hash40, prefix + string + suffix))
+        else:
+            print("{2} {0} -> {1}".format(find.hash40, prefix + string + suffix, find.tag))
 
 def process(string):
     global length, checkAll
