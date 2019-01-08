@@ -7,7 +7,6 @@ prefix = ''
 suffix = ''
 length = 0
 depth = 0
-checkAll = False
 hashes = []
 defaultPath = "hashes.txt"
 dictionaryPath = "dictionary.txt"
@@ -49,17 +48,10 @@ def checkLoop(currentDepth, prevWords, prevWord, string):
             loop(currentDepth, prevWords, prevWord, string)
 
 def process(currentDepth, prevWords, prevWord, string):
-    global length, checkAll
-    if(checkAll):
-        if(len(string) + getInputLength() < length):
+    global length
+    if(len(string) + getInputLength() < length):
             check(string)
             checkLoop(currentDepth + 1, prevWords, prevWord, string)
-    else:
-        if(len(string) + getInputLength() == length):
-            check(string)
-        else:
-            if(len(string)  + getInputLength() < length):
-                checkLoop(currentDepth + 1, prevWords, prevWord, string)
 
 def loop(currentDepth, prevWords, prevWord, string):
     global dictionary
@@ -78,22 +70,37 @@ def StartLoop():
         print(word)
         process(0, [word], word, word)
 
+#Prints first character to show progress
+def StartLoopFromWord(first):
+    global dictionary
+    used = False
+    for word in dictionary:
+        if used:
+            print(word)
+            process(0, [word], word, word)
+        else:
+            if word == first:
+                used = True
+                print(word)
+                process(0, [word], word, word)
+
 def start(argv):
-    global defaultPath, prefix, suffix, length, checkAll, depth
+    global defaultPath, prefix, suffix, length, depth
     path = defaultPath
+    first = None
     try:
-      opts, args = getopt.getopt(argv,"hl:d:p:s:f",["suffix=","prefix=","length=", "checkAll", "file=", "depth="])
+      opts, args = getopt.getopt(argv,"hl:d:p:s:f",["suffix=","prefix=","length=", "file=", "depth=", "startFrom="])
     except getopt.GetoptError:
-        print('dictionary.py -l <int> (-d <int>) (-p <string>) (-s <string>) (--checkAll)')
+        print('dictionary.py -l <int> (-d <int>) (-p <string>) (-s <string>) (--startFrom=<string>)')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('dictionary.py -l <int> (-p <string>) (-s <string>) (--checkAll)')
-            print("-l/--length= <int>: Max length of strings, takes into account prefix and suffix. If checkAll isn't enabled only strings with this length will be hashed and compared with list")
+            print('dictionary.py -l <int> (-p <string>) (-s <string>) (--startFrom=<string>)')
+            print("-l/--length= <int>: Max length of strings, takes into account prefix and suffix")
             print("-d/--depth= <int>: Max amount of words to use (prefix/suffix not counted)")
             print("-p/--prefix= <string>: Prefix to add to generated strings")
             print("-s/--suffix= <string>: Suffix to add to generated strings")
-            print("--checkAll: Check all strings hashes regardless of length")
+            print("--startFrom: Word to start checking from dictionary")
             sys.exit()
         elif opt in ("--prefix", "-p"):
             prefix = arg
@@ -103,20 +110,23 @@ def start(argv):
             length = int(arg)
         elif opt in ("--depth", "-d"):
             depth = int(arg)
-        elif opt in ("--checkAll"):
-            checkAll = True
         elif opt in ("--file", "-f"):
             path = arg
+        elif opt in ("--startFrom"):
+            first = arg
     
     if(length == 0):
         print("Error: No length given")
-        print('Usage: dictionary.py -l <int> (-p <string>) (-s <string>) (--checkAll)')
+        print('Usage: dictionary.py -l <int> (-p <string>) (-s <string>) (--startFrom=<string>)')
         sys.exit()
     
     if(getInputLength() < length):
         openFile(path)
         openDict()
-        StartLoop()
+        if first is None:
+            StartLoop()
+        else:
+            StartLoopFromWord(first)
     else:
         print("length is lower than prefix + suffix")
 
