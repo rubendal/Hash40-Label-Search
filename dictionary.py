@@ -7,6 +7,7 @@ prefix = ''
 suffix = ''
 depth = 2
 hashes = []
+repeat = True
 defaultPath = "hashes.txt"
 dictionaryPath = "dictionary.txt"
 
@@ -58,14 +59,17 @@ def process(currentDepth, prevWords, prevWord, string):
     checkLoop(currentDepth + 1, prevWords, prevWord, string)
 
 def loop(currentDepth, prevWords, prevWord, string):
-    global dictionary
+    global dictionary, repeat
     for word in dictionary:
-        if(word not in prevWords):
-            if(prevWord != "_" and word != "_"):
-                words = prevWords.copy()
-                if(word != "_"):
-                    words.append(word)
-                process(currentDepth, words, word, string + "_" + word)
+        if not repeat:
+            if(word not in prevWords):
+                if(prevWord != "_" and word != "_"):
+                    words = prevWords.copy()
+                    if(word != "_"):
+                        words.append(word)
+                    process(currentDepth, words, word, string + "_" + word)
+        else:
+            process(currentDepth, [], word, string + "_" + word)
 
 #Prints first character to show progress
 def StartLoop():
@@ -89,21 +93,22 @@ def StartLoopFromWord(first):
                 process(0, [word], word, word)
 
 def start(argv):
-    global defaultPath, prefix, suffix, depth
+    global defaultPath, prefix, suffix, depth, repeat
     path = defaultPath
     first = None
     try:
-      opts, args = getopt.getopt(argv,"h:d:p:s:f",["suffix=","prefix=", "file=", "depth=", "startFrom="])
+      opts, args = getopt.getopt(argv,"h:d:p:s:f",["suffix=","prefix=", "file=", "depth=", "startFrom=", "noRepeat"])
     except getopt.GetoptError:
-        print('dictionary.py (-d <int>) (-p <string>) (-s <string>) (--startFrom=<string>)')
+        print('dictionary.py (-d <int>) (-p <string>) (-s <string>) (--startFrom=<string>) (--noRepeat)')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('dictionary.py -l <int> (-p <string>) (-s <string>) (--startFrom=<string>)')
+            print('dictionary.py -l <int> (-p <string>) (-s <string>) (--startFrom=<string>) (--noRepeat)')
             print("-d/--depth= <int>: Max amount of words to use (prefix/suffix not counted)")
             print("-p/--prefix= <string>: Prefix to add to generated strings")
             print("-s/--suffix= <string>: Suffix to add to generated strings")
-            print("--startFrom: Word to start checking from dictionary")
+            print("--startFrom= <string> Word to start checking from dictionary")
+            print("--noRepeat Prevents string from having words that have been used (not counting prefix and suffix)")
             sys.exit()
         elif opt in ("--prefix", "-p"):
             prefix = arg
@@ -115,6 +120,8 @@ def start(argv):
             path = arg
         elif opt in ("--startFrom"):
             first = arg
+        elif opt in ("--noRepeat"):
+            repeat = False
     
     if depth > 0:
         openFile(path)
